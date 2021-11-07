@@ -1,13 +1,23 @@
 
 # About the project
 
-*Write a short description about the course and add a link to your GitHub repository here. This is an R Markdown (.Rmd) file so you should use R Markdown syntax.*
+## RStudio Exercise 1:
+*for course Introduction to Open Data Science 2021*
+
+### Tasks and Instructions 1.(/5)
+
+:white_check_mark:
+
+### Tasks and Instructions 2.(/5)
+
+Feeling a bit exited for this course. 
+
+I heard about this course through University of Eastern Finland (internal communication) Yammer pages. 
+
+Link to Github repository [here](https://github.com/oqe/IODS-project.git). 
 
 ```{r}
-# This is a so-called "R chunk" where you can write R code.
 
 date()
 
 ```
-The text continues here.
-
