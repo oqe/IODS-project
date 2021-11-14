@@ -1,4 +1,10 @@
-# Insert chapter 2 title here
+# RStudio Exercise 2
+
+This week I have done quite a bit of DataCamp practices. So much so that I went on to next weeks' DataCamp practices as DataCamp's bottom grey-blue bar indicator of the progress was showing five distinct chapters. I did not release that one bar was for one week. This made me stress quite a bit as there didn't seem to be an end to the DataCamp practices. 
+
+Unfortunately I have not managed to start reading the recommended reading material this week, which I really know I should.
+
+I started the exercises too late.
 
 *Describe the work you have done this week and summarize your learning.*
 
@@ -10,4 +16,91 @@
 date()
 ```
 
-Here we go again...
+## 1. Read the data
+
+Read the data file to an object.
+Display the object (data table).
+
+```{r}
+# Read the data
+learning2014 <- read.table(
+  file = "http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/learning2014.txt",
+  header = TRUE,
+  sep = ",")
+
+# check first few lines of the read data... table
+head(learning2014)
+```
+Looking at the table, note to prior Data Wrangling part: attitude should have been scaled (divided by 10) as in DataCamp exercises. Exercise instructions were unclear on this (in the Data Wranglin part).
+
+Check data dimensionality:
+
+```{r}
+dim(learning2014)
+```
+
+Check data structure: 
+
+```{r}
+str(learning2014)
+```
+Dataset is from a questionaire study, "international survey of Approaches to Learning". Check [here](https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt). 
+
+**"gender"** is sex/gender of the questionaire participant. Data type is character (chr).  
+**"age"** is the age of the participant in year (presumably). Data type is integer (int).  
+**"attitude"** is "Global attitude toward statistics" divided by 10. Data type is integer (int).  
+**"deep"** is a mean value of the following original variables: "D03", "D11", "D19", "D27", "D07", "D14", "D22", "D30","D06",  "D15", "D23", "D31", summarizing deep learning of the participant. Data type is numeric (can be numbers with decimals).  
+**stra** is a mean value of the following original variables: "ST01","ST09","ST17","ST25","ST04","ST12","ST20","ST28", summarizing strategic learning of the participant. Data type is numeric (can be numbers with decimals).  
+**surf** is a mean value of the following original variables: "SU02","SU10","SU18","SU26", "SU05","SU13","SU21","SU29","SU08","SU16","SU24","SU32, summarizing surface learning of the participant. Data type is numeric (can be numbers with decimals).  
+**points** are exam points. Data type is integer (int).  
+
+## 2. Graphical overview, summaries 
+
+First we might need to install some packages to make some nice graphical overviews:
+
+```{r}
+# uncomment if you need to install
+#install.packages("GGally", "ggplot2")
+```
+
+Let's start plotting some scatter plot matrix from our data:
+
+```{r}
+# access the GGally and ggplot2 libraries
+library(GGally)
+library(ggplot2)
+
+# create a more advanced plot matrix with ggpairs()
+p <- ggpairs(learning2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+# draw the plot
+p
+
+```
+
+As you can see the (multi)plot above is quite busy. Lots of information to take in.  
+Let's start of by noting the column names above and row names on the right side. There is no legend for gender, but checking the plot there is F and M, F is for Female and M is for Male. So this plot is color coded by gender.
+
+Top left corner, gender column and gender row, we can see the counts of each value.
+F pinkish color, M cyan. We can see the female participant count is almost double the male count. Let's check this:
+
+```{r}
+table(learning2014$gender)
+```
+Top row (after gender to right) we have boxplots per each gender. Boxplot's describes the spread/distribution of values. The box part of boxplot describes interquartile range from Q1 (25th percentile) to Q3 (75th percentile), with the median (Q2/50th percentile) of values line in between Q1 and Q3. Circles describe possible outliers (as per presuming normal distribution of the values which is not always the case).
+
+Left side (under gender), barplots display **value** of row (y-axis) to **count** of the values (x-axis) (AND BY GENDER).
+
+Scatter plots (plots with points) are column values (x-axis) plotted against row values (y-axis).
+
+We also have pairwise correlation information, one variable against another. Most interesting of teh correlations are Points and Attitude are positively correlated with each other. Deep learning and surface learning are negatively correlated with each other, but only with Males. So the values of these variables are somehow intertwined or in relation to each other.
+
+Print summaries:
+
+```{r}
+summary(learning2014)
+```
+
+For numeric values of each variable we have the minimum and maximum value, mean. Median and 1st Quantile and 3rd Quantile are presented in boxplots (as previously explained). If the value distribution would be normal then 50% of the values would be inbetween Q1 and Q3 values.
+
+## 3. Three variables as explanatory variables and fit a regression model 
