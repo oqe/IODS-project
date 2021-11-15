@@ -104,3 +104,56 @@ summary(learning2014)
 For numeric values of each variable we have the minimum and maximum value, mean. Median and 1st Quantile and 3rd Quantile are presented in boxplots (as previously explained). If the value distribution would be normal then 50% of the values would be inbetween Q1 and Q3 values.
 
 ## 3. Three variables as explanatory variables and fit a regression model 
+
+Multiple regression model as there are more than three explanatory variables.
+
+Let's have **deep**, **stra** and **surf** as explanatory variables for target variable **points**.
+
+```{r}
+# create multiple regression model
+my_model <- lm(points ~ deep + stra + surf, data = learning2014)
+
+# print out summary of the model
+summary(my_model)
+```
+Does not seem too good. When doing multiple regression we are more interested in adjusted R-squared value, which is quite low, so the model doesn't really explain. Let's change up the model by switching one of the explanatory variables.
+
+New model:
+
+```{r}
+my_model <- lm(points ~ attitude + stra + surf, data = learning2014)
+
+# print out summary of the model
+summary(my_model)
+```
+## 4. i) Explain the relationship between the chosen explanatory variables and the target variable (interpret the model parameters) ii) Explain and interpret the multiple R squared of the model
+
+### i) Explain the relationship between the chosen explanatory variables and the target variable (interpret the model parameters
+
+Increase of 1 exam point is associated with 0.339 increase in attitude points.
+0.853 is estimated effect of strategic learning to exam points adjusting for attitude.
+-0.586 is estimated effect of surface learning to exam points adjusting for attitude and strategic learning.
+
+### ii) Explain and interpret the multiple R squared of the model
+
+Adjusted R-squared is 0.1927, so almost 20% of variation in exam points can be explained by attitude, strategic learning and surface learning. Adjusted R-squared is the more important measure as we have multiple explanatory variables.
+
+## 5. Plots: Residuals vs Fitted values, Normal QQ-plot and Residuals vs Leverage.
+
+Let's produce the plots: Residual vs Fitted values, Normal QQ-plot and Residuals vs Leverage
+
+```{r}
+# create the model again just in case
+my_model <- lm(points ~ attitude + stra + surf, data = learning2014)
+
+# draw diagnostic plots using the plot() function. Choose the plots Residual vs Fitted values, Normal QQ-plot and Residuals vs Leverage (which are 1,2 and 5)
+par(mfrow = c(2,2))
+plot(my_model, which = c(1,2,5))
+
+```
+
+**Residuals vs Fitted:** Reasonable random spread of points. So there shouldn't be a problem with the assumptions.
+
+**Normal Q-Q:** In the middle there seems to quite good fit to the normality line, but in the beginning and in the end there is a deviation from the line. So there isn't a reasonable with to the normality assumption.
+
+**Residuals vs Leverage:** this plot can help to identify observations that have unusually high impact. There is seemingly few outlier values in the bottom of the plot. So these outliers may highly impact the model in question.
