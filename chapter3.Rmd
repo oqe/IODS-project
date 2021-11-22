@@ -131,5 +131,44 @@ We'll perform logistic regression to explore the relationships between the famre
 log_reg_model <- glm(high_use ~ famrel + age + higher + failures, data = alc, family = "binomial")
 summary(log_reg_model)
 
+# compute odds ratios (OR)
+OR <- coef(log_reg_model) %>% exp
+
+# compute confidence intervals (CI)
+CI <- confint(log_reg_model) %>% exp
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
 ```
 
+Seems a bit off since we can't see other factors for famrel. Let's add factors.
+
+```{r}
+log_reg_model <- glm(high_use ~ factor(famrel) + age + factor(higher) + failures, data = alc, family = "binomial")
+summary(log_reg_model)
+
+# compute odds ratios (OR)
+OR <- coef(log_reg_model) %>% exp
+
+# compute confidence intervals (CI)
+CI <- confint(log_reg_model) %>% exp
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+```
+
+Let's try model without intercept.
+
+```{r}
+log_reg_model <- glm(high_use ~ factor(famrel) + age + factor(higher) + failures -1, data = alc, family = "binomial")
+summary(log_reg_model)
+
+# compute odds ratios (OR)
+OR <- coef(log_reg_model) %>% exp
+
+# compute confidence intervals (CI)
+CI <- confint(log_reg_model) %>% exp
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+```
