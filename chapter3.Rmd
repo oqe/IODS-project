@@ -1,0 +1,135 @@
+# RStudio Exercise 3
+
+## 2. Read data
+
+```{r}
+alc <- read.csv("https://github.com/rsund/IODS-project/raw/master/data/alc.csv", header = TRUE, sep = ",")
+
+colnames(alc)
+
+```
+Original data set description can be found [here](https://archive.ics.uci.edu/ml/datasets/Student+Performance). The read data is combination of two data sets regarding the performance in Mathematics and Portuguese language. So originally two different data sets with same variables relating to student grades, demographic, social and school related features.
+
+Variables/column names with suffix **.p** are originals from por (Portuguese language) dataset and **.m** from mat (Mathematics) dataset. The combination dataset in question has the following variables: "failures", "paid"(first value selected), "absences", "G1", "G2", "G3", are averaged from mat and por datasets. "alc_use" is averaged from "Dalc" workday alcohol consumption (numeric: from 1 - very low to 5 - very high) and "Walc" - weekend alcohol consumption (numeric: from 1 - very low to 5 - very high). "high_use" is TRUE if 'alc_use' is higher than 2 and FALSE otherwise.
+
+## 3. Choosing 4 interesing variables to study relationships between high/low alcohol consumption
+
+**higher** - wants to take higher education. I hypothesize that students not wanting to take higher education would have higher alcohol consumption.
+
+**famrel** - quality of family relationships (numeric: from 1 - very bad to 5 - excellent). I think family relationship might be an interesting variable that might be highly correlated with alcohol consumption as in students with bad family relationships would likely drink more and vice versa.
+
+**age** - my hypothesis is that older persons will likely have higher alcohol consumption, as the age range is from 15 to 22, over 18 persons can buy alcohol legally.
+
+**failures** - number of past class failures (numeric: n if 1<=n<3, else 4). I hypotize that high failures would correlate with high alcohol consumption.
+
+
+## 4. Exploring distributions of previously chosen variables
+
+Check our variable types etc.
+
+```{r}
+library(dplyr)
+
+my_vars <- c("high_use", "higher", "age", "famrel", "failures")
+interest_alc <- subset(alc, select = my_vars)
+
+glimpse(interest_alc)
+```
+
+Let's examine our selected variables' "higher"', "age", "famrel", "failures" and "high_use" count distuributions.
+
+```{r}
+library(tidyr); library(ggplot2)
+
+gather(interest_alc) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
+```
+
+### higher 
+
+Interesting, it looks like most do want to take higher education. Let's check the actual counts on that one and plot with them.
+
+```{r}
+alc %>% group_by(higher) %>% summarise(count = n())
+
+alc %>% group_by(high_use, higher) %>% summarise(count = n())
+
+alc %>% group_by(high_use, higher) %>% summarise(count = n()) %>%
+   ggplot(aes(x = higher, y = count, fill = high_use)) +
+   geom_col() + 
+   facet_wrap("high_use")
+```
+
+I am somewhat suprised by this that the majority of the students want to continue higher education. So there is very few who overall who do not want to take higher education. Looks like my hypothesis is not withholding.
+
+### famrel 
+
+Summarize counts of high_use by famrel in table and in barplot.
+
+```{r}
+alc %>% group_by(high_use, famrel) %>% summarise(count = n())
+
+alc %>% group_by(high_use, famrel) %>% summarise(count = n()) %>%
+   ggplot(aes(x = famrel, y = count, fill = high_use)) +
+   geom_col() + 
+   facet_wrap("high_use")
+```
+
+*famrel - quality of family relationships (numeric: from 1 - very bad to 5 - excellent)*. Bad family relations was lower number and good were higher number. Looks like my hypothesis is rather poor in this one. The counts for high_use and bad family relationships are very low. Overall bad family relationships are seem to pretty low with students.
+
+### failures
+
+Summarize counts of high_use by failures in table and in barplot.
+
+```{r}
+
+alc %>% group_by(high_use, failures) %>% summarise(count = n())
+
+alc %>% group_by(high_use, failures) %>% summarise(count = n()) %>%
+   ggplot(aes(x = failures, y = count, fill = high_use)) +
+   geom_col() + 
+   facet_wrap("high_use")
+
+```
+
+I hypotized that high failures would be in relation with high alcohol consumption. Does not seem to be much difference in the groups. Overall failures count is very low and the spread of high alcohol consumption with more than 1 or more failures is very close in non high alcohol consumption with high alcohol consumption groups.
+
+### age
+
+```{r}
+
+alc %>% group_by(high_use) %>% summarise(mean = mean(age))
+
+# initialise a plot of high_use and age
+g2 <- ggplot(alc, aes(x = high_use, y = age))
+
+# define the plot as a boxplot and draw it
+g2 + geom_boxplot() + ggtitle("Student age by alcohol consumption")
+
+# lets also seem the same with sex added
+g3 <- ggplot(alc, aes(x = high_use, y = age, col = sex))
+g3 + geom_boxplot() + ggtitle("Student age by alcohol consumption and sex")
+
+alc %>% group_by(high_use, age) %>% summarise(count = n())
+
+alc %>% group_by(high_use, age) %>% summarise(count = n()) %>%
+   ggplot(aes(x = age, y = count, fill = high_use)) +
+   geom_col() + 
+   facet_wrap("high_use")
+
+```
+
+Average age for higher use is slightly higher, but there does not seem to be a that much more higher age for high alcohol consuming students especially over or 18.
+
+Overall looks like I chose poor variables that might be in very poor / nonexistent relation with high alcohol consumption.
+
+## 5. Logistic regression with chosen variables
+
+We'll perform logistic regression to explore the relationships between the famrel, age, higher, failures variables with high/low alcohol consumption as target variable
+
+```{r}
+
+log_reg_model <- glm(high_use ~ famrel + age + higher + failures, data = alc, family = "binomial")
+summary(log_reg_model)
+
+```
+
