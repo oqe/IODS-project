@@ -16,20 +16,20 @@ Original data description can be found [here](https://stat.ethz.ch/R-manual/R-de
 
 The Boston data frame is of housing values in suburbs of Boston and it has 506 rows and 14 columns.
 
-**crim**      per capita crime rate by town.  
-**zn**        proportion of residential land zoned for lots over 25,000 sq.ft.  
-**indus**     proportion of non-retail business acres per town.  
-**chas**      Charles River dummy variable (= 1 if tract bounds river; 0 otherwise).  
-**nox**       nitrogen oxides concentration (parts per 10 million).  
-**rm**        average number of rooms per dwelling.  
-**age**       proportion of owner-occupied units built prior to 1940.  
-**dis**       weighted mean of distances to five Boston employment centres.  
-**rad**       index of accessibility to radial highways.  
-**tax**       full-value property-tax rate per \$10,000.  
-**ptratio**   pupil-teacher ratio by town.  
-**black**     1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town.  
-**lstat**     lower status of the population (percent).  
-**medv**      median value of owner-occupied homes in \$1000s.  
+**crim** - per capita crime rate by town.  
+**zn** - proportion of residential land zoned for lots over 25,000 sq.ft.  
+**indus** - proportion of non-retail business acres per town.  
+**chas** - Charles River dummy variable (= 1 if tract bounds river; 0 otherwise).  
+**nox** - nitrogen oxides concentration (parts per 10 million).  
+**rm** - average number of rooms per dwelling.  
+**age** - proportion of owner-occupied units built prior to 1940.  
+**dis** - weighted mean of distances to five Boston employment centres.  
+**rad** - index of accessibility to radial highways.  
+**tax** - full-value property-tax rate per \$10,000.  
+**ptratio** - pupil-teacher ratio by town.  
+**black** - 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town.  
+**lstat** - lower status of the population (percent).  
+**medv** - median value of owner-occupied homes in \$1000s.  
 
 ## 3. Graphical overview and summaries of the data
 
@@ -72,10 +72,11 @@ corrplot(cor_matrix, method="circle", type="upper", cl.pos="b", tl.pos="d", tl.c
 
 In the correlation matrix visualization above the more red color symbolizes negative correlation the bigger it is. The positive correlation is presented by blue tint and the bigger the circle, bigger the (positive).
 
-_Few picks on the correlation matrix:_
+**Few picks on the correlation matrix:**
+
 **crim** "per capita crime rate by town" is most positively correlated with **rad** "index of accessibility to radial highways". 
 
-*indus* "proportion of non-retail business acres per town." is negatively correlated with *dis* "weighted mean of distances to five Boston employment centres". So... bigger proportion of non-retail business acres per town is situated away from Boston's five employment centers, in other words, industy areas are situated away from center's of the towns. 
+**indus** "proportion of non-retail business acres per town." is negatively correlated with **dis** *"weighted mean of distances to five Boston employment centres"*. So... bigger proportion of non-retail business acres per town is situated away from Boston's five employment centers, in other words, industy areas are situated away from center's of the towns. 
 
 ## 4. Standardize dataset
 
@@ -93,7 +94,6 @@ boston_scaled <- as.data.frame(boston_scaled)
 ```
 
 Standardized and scaled variables now have negative values as before there were only positive values. The values are now in "the same ball park" for all the variables.
-
 
 Here we create a categorical variable of the crime rate in the Boston dataset (from the scaled crime rate) using quantiles (and renaming them "low", "med_low", "med_high", "high") and we drop the original crime rate variable out: 
 
@@ -163,7 +163,7 @@ lda.arrows(lda.fit, myscale = 2)
 Seems that most of the high crime rate is best predicted by **rad** - *index of accessibility to radial highways*. 
 **zn** - *proportion of residential land zoned for lots over 25,000 sq.ft.* seems to best predict low crime rates. So a defiency of small houses predicts lower crime rate...
 
-**nox** - *nitrogen oxides concentration (parts per 10 million).*
+**nox** - *nitrogen oxides concentration (parts per 10 million).* seems to predict med_high to high crime rate as well.
 
 ## 6. Predicting classes with the LDA model on the test data
 
@@ -214,7 +214,6 @@ km <-kmeans(boston_scaled, centers = 3)
 pairs(boston_scaled, col = km$cluster)
 ```
 
-#Investigate what is the optimal number of clusters and run the algorithm again. Visualize the clusters (for example with the pairs() or ggpairs() functions, where the clusters are separated with colors) and interpret the results
 
 
 ```{r}
@@ -236,6 +235,37 @@ km <-kmeans(boston_scaled, centers = 2)
 
 # plot the Boston dataset with clusters
 pairs(boston_scaled, col = km$cluster)
+
+```
+
+With the amount of two clusters you can get pretty decent separation between most variables.
+
+## Bonus
+
+## Super-bonus
+
+```{r}
+model_predictors <- dplyr::select(train, -crime)
+
+# check the dimensions
+dim(model_predictors)
+dim(lda.fit$scaling)
+
+# matrix multiplication
+matrix_product <- as.matrix(model_predictors) %*% lda.fit$scaling
+matrix_product <- as.data.frame(matrix_product)
+```
+
+```{r}
+library(plotly)
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers')
+```
+
+```{r}
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color = train$crime)
+```
+
+```{r}
 
 ```
 
