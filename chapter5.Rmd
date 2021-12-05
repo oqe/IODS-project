@@ -1,0 +1,231 @@
+# RStudio Exercise 5
+
+## 1. Read data, data summaries and graphical overview of variables
+
+Read data to object human2, make "first" column as rownames.
+
+```{r Ex5. load data}
+human2 <- read.table(file = "http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human2.txt", header = TRUE, sep = ",", row.names = 1)
+
+# check dimensions (155, 8)
+dim(human2)
+```
+
+Let's check the structure of the data first.
+
+```{r Ex5. data structure}
+str(human2)
+```
+
+All variables are numeric. 
+
+Let's check summary.
+
+```{r Ex5. data summaries}
+summary(human2)
+```
+
+**Edu2.FM** was *"Proportion of females with at least secondary education"* divided with *"Proportion of males with at least secondary education"*. So values under 1 are means the proportion of females with at least secondary education is lower than in males. If it's over 1 then females have higher proportion of at least secondary education to males. Looks like females typically have lower proportion of at least secondary education to males (per country)
+
+**Labo.FM** was *"Proportion of females in the labour force"* divided by *"roportion of males in the labour force"*. Same as with previous variable, lower than 1 means the proportion of females working is lower than proportion of males working. This seems to be the case overall.
+
+**Edu.Exp** is expected years of schooling per country. Minimum value is super low, mean is 13,18 years.
+
+**Life.Exp** is Life expectancy at birth.
+
+**GNI** Gross National Income per capita. Really big differences here. Let's see more with graphical overview
+
+**Mat.Mor** Maternal mortality ratio is deaths per 100,000 live births. Minimum being 1 death per 100,000 and highest value being 1100. Mean on the other hand is 149,1. So seem the values are really skewed to lower values.
+
+**Ado.Birth** is Adolescent birth rate is births per 1,000 women ages 15–19.
+
+**Parli.F** Percetange of female representatives in parliament. Minimum being 0, so all male parliment representatives. Highest reaching only 57,5% of females in parliment. Mean is ~21%.
+
+```{r Ex.5 scatterplot, fig.height=8, fig.width=14, fig.cap="**Figure 1.** Scatterplot/correlations of human2 variables" }
+library(ggplot2)
+library(GGally)
+
+ggpairs(human2,
+        upper = list(continuous = wrap('cor', size = 4)),
+        title = "Scatterplot matrix of selected variables from Human Development Report 2015")
+```
+
+**Life.Exp** is positively correlated with **Edu.Exp**. Higher life expectancy correlates with higher expected years in school.
+
+**GNI** is positively correlated with **Edu.Exp**. Higher Gross National Income per capita correlates with higher expected years in school. GNI also positively correlates with **Life.Exp**. Higher gross national income per capita correlates with higher life expectancy.
+
+**Mat.mor** is negatively correlated with **Edu2.FM**. Higher Maternal mortality ratio correlates with lower proportion of females with at least secondary education to males. Also higher adolescent birth rate **Ado.Birth** correlates with lower **Edu2.FM**.
+
+Higher adolescent birth rate **Ado.birth** correlates with lower amount of expected years in school (**Edu.Exp**), lower life expectancy (**Life.Exp**), lower gross National Income per capita (**GNI**) and higher maternal mortality rate (**Mat.Mor**).
+
+## 2. PCA, biplot with non standardized data
+
+Principal component analysis of the non standardized data.
+
+```{r Ex5. PCA on non standardized data }
+# perform pca
+pca_human <- prcomp(human2)
+
+# summary of pca_human
+s <- summary(pca_human)
+
+
+# rounded percentages of variance captured by each PC
+pca_pr <- round(100*s$importance[2,], digits = 1) 
+pca_pr
+```
+
+```{r, Ex5. PCA biplot on unstandardized data, warning=FALSE, fig.height=12, fig.width=12, fig.cap="**Figure 2.** biplot of PCA"}
+# create object pc_lab to be used as axis labels
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+
+# draw a biplot
+biplot(pca_human, 
+       cex = c(0.8, 1), 
+       col = c("grey40", "deeppink2"), 
+       xlab = pc_lab[1], 
+       ylab = pc_lab[2],
+       caption = "")
+```
+
+```{r}
+library(FactoMineR)
+#PCA(X, scale.unit = TRUE, ncp = 5, graph = TRUE)
+
+res.pca <- PCA(human2, graph = FALSE)
+print(res.pca)
+
+#install.packages("factoextra")
+library(factoextra)
+var <- get_pca_var(res.pca)
+head(var$cos2)
+library(corrplot)
+corrplot(var$cos2, is.corr=FALSE)
+```
+
+First prinicipal component explains 100% of the variance in non-standardized data.
+
+## 3. PCA, biplot with standardized data
+
+Principal component analysis of standardized data.
+
+```{r Ex5. PCA on standardized data}
+# standardize variables
+human_std <- scale(human2)
+
+# perform pca
+pca_human <- prcomp(human_std)
+
+# summary of pca_human
+s <- summary(pca_human)
+
+# rounded percentages of variance captured by each PC
+pca_pr <- round(100*s$importance[2,], digits = 1) 
+pca_pr
+
+```
+
+```{r, Ex5. PCA biplot on standardized data, warning=FALSE, fig.height=12, fig.width=12, fig.cap="**Figure 3.** biplot of PCA"}
+# create object pc_lab to be used as axis labels
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+
+# draw a biplot
+biplot(pca_human, 
+       cex = c(0.8, 1), 
+       col = c("grey40", "deeppink2"), 
+       xlab = pc_lab[1], 
+       ylab = pc_lab[2], 
+       caption = "")
+```
+
+```{r}
+res.pca <- PCA(human_std, graph = FALSE)
+print(res.pca)
+
+#install.packages("factoextra")
+library(factoextra)
+var <- get_pca_var(res.pca)
+head(var$cos2)
+library(corrplot)
+corrplot(var$cos2, is.corr=FALSE)
+```
+
+Unlike in previous section 3. now the first principal component does not explain 100% of the variance, but 53.6%. Second principal component explains 16.2% of the variance, pc3 9.6% etc.
+
+Our variables are not measured on the same scale. By doing standardization we assign equal importance to all variables.
+
+## 4. First two principal component dimensions (of standardized data)
+
+## 5. Factominer, tea dataset, MCA
+
+Let's install FactoMineR if we already do not have it. Load the FactoMineR library, load tea data and check tea data's structure.
+
+```{r Ex5. FactoMineR and tea dataset}
+#install.packages("FactoMineR")
+library(FactoMineR)
+
+# load data
+data(tea)
+
+# check structure
+str(tea)
+```
+
+```{r Ex5. check information on "tea" dataset}
+?tea
+```
+
+> The data used here concern a questionnaire on tea. We asked to 300 individuals how they drink tea (18 questions), what are their product's perception (12 questions) and some personal details (4 questions).
+
+Okay, so everything else is categorical variable (factor) with most having two levels (two different options/values), except age which is continuous (integer). 36 variables with 300 rows/observations.
+
+```{r Ex5. Visualize few tea dataset variables}
+# column names to keep in the dataset
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+# select the 'keep_columns' to create a new dataset
+tea_time <- select(tea, one_of(keep_columns))
+
+gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free")  + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+```
+
+Visualization of few (categorical) variables of tea dataset with level of the variable on x-axis and count on y-axis.
+
+Most people drink tea made from tea bags bought from chain store, most likely Earl Grey, drink it without any additional substances (lemon, milk, other) mostly not during on lunch. Close to have drink their tea with sugar. 
+
+```{r, Ex5. MCA biplot, fig.height=12, fig.width=12, fig.cap="**Figure 4.** MCA plot for tea dataset"}
+# multiple correspondence analysis
+mca <- MCA(tea_time, graph = FALSE)
+
+# summary of the model
+summary(mca)
+
+# visualize MCA
+#plot(mca, invisible=c("ind"), habillage = "quali")
+plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "classic")
+
+```
+
+```{r, Ex5. MCA biplot 2, fig.height=12, fig.width=12, fig.cap="**Figure 4.** MCA plot for tea dataset"}
+# multiple correspondence analysis
+
+teaa <- select(tea, -age)
+mca <- MCA(teaa, graph = FALSE)
+
+# summary of the model
+summary(mca)
+
+# visualize MCA
+#plot(mca, invisible=c("ind"), habillage = "quali")
+#plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "classic")
+
+library(factoextra)
+fviz_mca_biplot(mca, 
+                repel = TRUE,
+                ggtheme = theme_minimal())
+
+```
+
