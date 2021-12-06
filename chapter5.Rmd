@@ -75,7 +75,7 @@ pca_pr <- round(100*s$importance[2,], digits = 1)
 pca_pr
 ```
 
-```{r, Ex5. PCA biplot on unstandardized data, warning=FALSE, fig.height=12, fig.width=12, fig.cap="**Figure 2.** biplot of PCA"}
+```{r, Ex5. PCA biplot on unstandardized data, warning=FALSE, fig.height=12, fig.width=12, fig.cap="**Figure 2.** biplot of non standardized values of PCA - First prinicipal component explains 100% of the variance in non-standardized data. Second, third etc. principal components explain close to nothing (rounds up to zero). This is typical if values are not measured on the same scale."}
 # create object pc_lab to be used as axis labels
 pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
 
@@ -84,23 +84,7 @@ biplot(pca_human,
        cex = c(0.8, 1), 
        col = c("grey40", "deeppink2"), 
        xlab = pc_lab[1], 
-       ylab = pc_lab[2],
-       caption = "")
-```
-
-```{r}
-library(FactoMineR)
-#PCA(X, scale.unit = TRUE, ncp = 5, graph = TRUE)
-
-res.pca <- PCA(human2, graph = FALSE)
-print(res.pca)
-
-#install.packages("factoextra")
-library(factoextra)
-var <- get_pca_var(res.pca)
-head(var$cos2)
-library(corrplot)
-corrplot(var$cos2, is.corr=FALSE)
+       ylab = pc_lab[2])
 ```
 
 First prinicipal component explains 100% of the variance in non-standardized data.
@@ -125,7 +109,7 @@ pca_pr
 
 ```
 
-```{r, Ex5. PCA biplot on standardized data, warning=FALSE, fig.height=12, fig.width=12, fig.cap="**Figure 3.** biplot of PCA"}
+```{r, Ex5. PCA biplot on standardized data, warning=FALSE, fig.height=12, fig.width=12, fig.cap="**Figure 3.** biplot of PCA of standardized data - Unlike in previous figure 2. (section 3.) now the first principal component explains 53.6% of the variance and second principal component explains 16.2% of the variance, pc3 9.6% etc."}
 # create object pc_lab to be used as axis labels
 pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
 
@@ -135,19 +119,8 @@ biplot(pca_human,
        col = c("grey40", "deeppink2"), 
        xlab = pc_lab[1], 
        ylab = pc_lab[2], 
-       caption = "")
-```
-
-```{r}
-res.pca <- PCA(human_std, graph = FALSE)
-print(res.pca)
-
-#install.packages("factoextra")
-library(factoextra)
-var <- get_pca_var(res.pca)
-head(var$cos2)
-library(corrplot)
-corrplot(var$cos2, is.corr=FALSE)
+       caption = "testiiii asgag0aw=-ghjsjhopfahopjdporfjsdpofjsdpojfpsojhgpo4306q0-12-0ra",
+       captionLabSize = 10)
 ```
 
 Unlike in previous section 3. now the first principal component does not explain 100% of the variance, but 53.6%. Second principal component explains 16.2% of the variance, pc3 9.6% etc.
@@ -155,6 +128,41 @@ Unlike in previous section 3. now the first principal component does not explain
 Our variables are not measured on the same scale. By doing standardization we assign equal importance to all variables.
 
 ## 4. First two principal component dimensions (of standardized data)
+
+Mostly on the first principal component axis **Edu.Exp**, **CNI**, **Edu2.FM**, **Life.Exp** are going (almost) to the same direction. The countries clustering to the this direction on the axis of first principal component (x-axis) have high educational expectancy, high CNI, high life expectancy, high female to male proportion ratio in at least secondary education. Vector lengths (arrows) describe the size of the effect of that variable on the x-axis for the country.
+
+**Mat.Mor** and **Abo.Birth** going to the opposite direction then the previously described group of variables. So High maternal mortality and Adolescent birth rate correlate with each other and the effect of these variables are mostly on the first principal component axis (x-axis).
+
+On the second principal component axis (y-axis) high **Parli.F** - percentage of female parliment representatives and **Labo.FM** high female to male proportion ratio of people in labour force are going almost to the same direction, but obviously are little skewed on the x-axis.
+
+There is quite a lot we can say from this picture. For example the cluster of Nordic countries *Iceland, Sweden, Norway, Finland, Denmark* in upper left side of the previous plot.  
+These countries have might one or more of the following **high**:  
+- Educational expectancy  
+- Life expectancy  
+- Gross National Income per capit  
+- female to male proportion ratio in at least secondary education  
+- percentage of female parliment representatives  
+- high female to male proportion ratio of people in labour force  
+
+*Qatar* has one or more of the following **high**:  
+- Educational expectancy  
+- Life expectancy  
+- Gross National Income per capit  
+- female to male proportion ratio in at least secondary education  
+..but **quite low**  
+- percentage of female parliment representatives  
+- high female to male proportion ratio of people in labour force  
+
+*Iran, Syria, Lebanon, Jordan, Yeme* islamic countries have one or more of the following **lowest**:  
+- percentage of female parliment representatives  
+- high female to male proportion ratio of people in labour force  
+
+*Mozambique, Niger, Mali, Chad, Central African Republic, Congo, Sierra Leone etc.* African countries have one or more of the following **highest**:  
+- maternal mortality  
+- adolescent birth rate  
+*Mozambique* also has **high**:  
+
+Not all the variables explain the same amount of effect for each country. In some the effects of the variables might differ a lot.
 
 ## 5. Factominer, tea dataset, MCA
 
@@ -209,7 +217,15 @@ plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "classic")
 
 ```
 
-```{r, Ex5. MCA biplot 2, fig.height=12, fig.width=12, fig.cap="**Figure 4.** MCA plot for tea dataset"}
+With the MCA plot we can get some patterns between categorical variables.
+
+For example on the lower right corner we have **unpackaged** and **tea shop** clustered together. Likely users who use unpackaged tea to make their tea shop their tea from tea shop.
+
+On the mid-low left side of the plot we have **tea bag** and **chain store** clustered together. Likely people who enjoy their tea by tea bags buy them from chain stores most of the time.
+
+Let's 
+
+```{r, Ex5. MCA biplot 2, fig.height=12, fig.width=12, fig.cap="**Figure 5.** MCA plot for tea dataset with all categorical variables"}
 # multiple correspondence analysis
 
 teaa <- select(tea, -age)
@@ -220,12 +236,13 @@ summary(mca)
 
 # visualize MCA
 #plot(mca, invisible=c("ind"), habillage = "quali")
-#plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "classic")
+plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "classic")
 
-library(factoextra)
-fviz_mca_biplot(mca, 
-                repel = TRUE,
-                ggtheme = theme_minimal())
+#library(factoextra)
+#fviz_mca_biplot(mca, 
+#                repel = TRUE,
+#                ggtheme = theme_minimal())
 
 ```
 
+With all other variables excluding continuous variable age we get this kind of plot. **NOTE!** With more categorical variables we get a lot less explanation of the variance by our correspondence dimensions only 5.84% for dim1 and 5.29% for dim2 compared to Figure 4. 15.24% for dim1 and 14.23% for dim2!!!
